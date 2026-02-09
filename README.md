@@ -16,7 +16,7 @@ The code implements the **Gradient-based Coupled Active Inference (G-CAI) Kuramo
    * **Generates Figure 2:** The hysteresis loop showing the bistable region (Defensive vs. Healthy wells).
 
 * **`sensitivity_analysis.py`** Performs a comprehensive parameter sweep to validate the topological robustness of the model.
-   * **Generates Figure S1:** Phase diagram (heatmap) of steady-state precision against Error Sensitivity ($\alpha$) and Environmental Uncertainty ($\sigma$).
+   * **Generates Figure 3:** Phase diagram (heatmap) of steady-state precision against Error Sensitivity ($\alpha$) and Environmental Uncertainty ($\sigma$).
 
 * **`requirements.txt`** List of Python dependencies required to run the simulations.
 
