@@ -67,7 +67,7 @@ python sensitivity_analysis.py
 
 ```
 
-*Output:* `Fig.S1_Robustness.png`
+*Output:* `Fig3_Robustness.png`
 
 ---
 
