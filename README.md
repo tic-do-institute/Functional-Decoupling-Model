@@ -71,13 +71,7 @@ python sensitivity_analysis.py
 
 ---
 
-## 📝 Citation
 
-If you use this code or model in your research, please cite the accompanying manuscript (citation details will be updated upon publication).
-
-**Current Reference:** Shiga, T. (2026). *Bistable Precision Dynamics and Informational Reversal: A Computational Mechanism of Defensive Functional Decoupling*. TIC-DO Institute. (Submitted)
-
----
 
 ## 📬 Contact
 
