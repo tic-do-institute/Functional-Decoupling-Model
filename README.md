@@ -1,9 +1,9 @@
 # Bistable Precision Dynamics and Informational Reversal
-## A Computational Mechanism of Defensive Functional Decoupling
+## A Computational Mechanism of Functional Decoupling
 
 **Official Simulation Code Repository** **Manuscript Status:** Under Review at *PNAS (Proceedings of the National Academy of Sciences)*
 
-This repository contains the source code used to generate the computational results and figures presented in the manuscript: *"Bistable Precision Dynamics and Informational Reversal: A Computational Mechanism of Defensive Functional Decoupling"*.
+This repository contains the source code used to generate the computational results and figures presented in the manuscript: *"Bistable Precision Dynamics and Informational Reversal: A Computational Mechanism of Functional Decoupling"*.
 
 The code implements the **Gradient-based Coupled Active Inference (G-CAI) Kuramoto model**, simulating how chronic functional disorders emerge as metastable attractors driven by defensive precision collapse and hysteresis.
 
@@ -32,8 +32,8 @@ The code implements the **Gradient-based Coupled Active Inference (G-CAI) Kuramo
 
 1. Clone this repository:
    ```bash
-   git clone [https://github.com/tic-do-institute/Defensive-Functional-Decoupling-Model.git](https://github.com/tic-do-institute/Defensive-Functional-Decoupling-Model.git)
-   cd Defensive-Functional-Decoupling-Model
+   git clone [https://github.com/tic-do-institute/Functional-Decoupling-Model.git](https://github.com/tic-do-institute/Functional-Decoupling-Model.git)
+   cd Functional-Decoupling-Model
 
 ```
 
