@@ -19,7 +19,7 @@ plt.rcParams.update({
 })
 
 class GradientKuramotoChain:
-    def __init__(self, n_nodes=5, dt=0.01, alpha_error=8.0, k_pot=1.0):
+    def __init__(self, n_nodes=5, dt=0.01, alpha_error=35.0, k_pot=1.0):
         self.N = n_nodes
         self.dt = dt
         self.theta = np.zeros(n_nodes)
