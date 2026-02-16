@@ -1,0 +1,155 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
+from dataclasses import dataclass
+
+# --- Plotting Standards ---
+plt.rcParams.update({
+    'font.family': 'sans-serif',
+    'font.sans-serif': ['Arial', 'Helvetica', 'DejaVu Sans'],
+    'font.size': 7,
+    'axes.labelsize': 8,
+    'axes.titlesize': 9,
+    'xtick.labelsize': 7,
+    'ytick.labelsize': 7,
+    'legend.fontsize': 6,
+    'lines.linewidth': 1.0,
+    'figure.titlesize': 10,
+    'savefig.dpi': 600,
+    'savefig.bbox': 'tight',
+    'savefig.pad_inches': 0.05
+})
+
+# ==============================================================================
+# 1. THE PHYSICS ENGINE (Core Physics Model)
+# ==============================================================================
+@dataclass
+class ModelParams:
+    n_nodes: int = 5
+    dt: float = 0.01
+    omega: float = 1.0
+    g_L: float = 0.5
+    g_U: float = 3.0
+    g_H: float = 6.0
+    k_pot: float = 2.0
+    alpha_error: float = 25.0
+    gamma_diss: float = 1.0
+
+class GCAIKuramotoChain:
+    def __init__(self, params: ModelParams):
+        self.p = params
+        self.reset()
+
+    def reset(self):
+        self.theta = np.zeros(self.p.n_nodes)
+        self.gamma = np.ones(self.p.n_nodes) * self.p.g_H
+
+    def _potential_force(self, gamma):
+        # Cubic derivative of the bistable potential V(gamma)
+        return self.p.k_pot * (gamma - self.p.g_L) * (gamma - self.p.g_U) * (self.p.g_H - gamma)
+
+    def step(self, noise_std_dev, sip_impulse=None):
+        N = self.p.n_nodes
+        theta_left = np.roll(self.theta, 1); theta_right = np.roll(self.theta, -1)
+        diff_left = np.sin(theta_left - self.theta); diff_left[0] = 0.0
+        diff_right = np.sin(theta_right - self.theta); diff_right[-1] = 0.0
+        weighted_coupling = self.gamma * (diff_left + diff_right)
+
+        neighbor_counts = np.ones(N) * 2; neighbor_counts[0] = 1; neighbor_counts[-1] = 1
+        sq_error = (diff_left**2 + diff_right**2) / neighbor_counts
+
+        F_intrinsic = self._potential_force(self.gamma)
+        F_error     = - self.p.alpha_error * sq_error
+        d_gamma = F_intrinsic + F_error
+
+        if sip_impulse is not None:
+            d_gamma += sip_impulse
+
+        self.gamma += d_gamma * self.p.dt
+        self.gamma = np.clip(self.gamma, 0.01, 10.0)
+
+        # Stochastic term (noise)
+        noise = np.random.normal(0, 1, N) * noise_std_dev * np.sqrt(self.p.dt)
+        d_theta = self.p.omega + weighted_coupling
+        self.theta += d_theta * self.p.dt + noise
+
+        z = np.mean(np.exp(1j * self.theta))
+        return self.theta, self.gamma, np.abs(z)
+
+# ==============================================================================
+# 2. GENERATE FIGURE 2 (Hysteresis Loop & Efficiency)
+# ==============================================================================
+def generate_figure2():
+    print("Generating Figure 2 (Hysteresis & Efficiency)...")
+    
+    params = ModelParams(n_nodes=5, dt=0.01, k_pot=2.0, alpha_error=25.0)
+    model = GCAIKuramotoChain(params)
+    
+    # Stress (sigma^2) sweep
+    sigma_fwd = np.linspace(0.0, 7.0, 50)
+    sigma_rev = np.linspace(7.0, 0.0, 50)
+    gamma_fwd = []
+    gamma_rev = []
+    eta_rev = []
+
+    settle_steps = 300
+    avg_window = 50
+    np.random.seed(42)
+
+    # Forward Sweep (Increasing Stress)
+    model.gamma[:] = params.g_H
+    for s in sigma_fwd:
+        gammas = []
+        for i in range(settle_steps):
+            noise_vec = np.ones(params.n_nodes) * np.sqrt(s) 
+            model.step(noise_vec)
+            if i >= (settle_steps - avg_window):
+                gammas.append(np.mean(model.gamma))
+        gamma_fwd.append(np.mean(gammas))
+
+    # Reverse Sweep (Decreasing Stress)
+    for s in sigma_rev:
+        gammas = []
+        for i in range(settle_steps):
+            noise_vec = np.ones(params.n_nodes) * np.sqrt(s)
+            model.step(noise_vec)
+            if i >= (settle_steps - avg_window):
+                gammas.append(np.mean(model.gamma))
+        
+        avg_gamma = np.mean(gammas)
+        gamma_rev.append(avg_gamma)
+        
+        # Calculate Efficiency eta
+        # eta = gamma / (gamma + gamma_diss)
+        eta = avg_gamma / (avg_gamma + params.gamma_diss)
+        eta_rev.append(eta)
+
+    # Plot
+    fig, ax1 = plt.subplots(figsize=(3.4, 2.8))
+    
+    # Plot Gamma (Left Axis)
+    ax1.plot(sigma_fwd, gamma_fwd, 'o-', c='#377EB8', ms=2.5, lw=1.2, label='Increasing Stress', zorder=2)
+    ax1.plot(sigma_rev, gamma_rev, 'o--', c='#E41A1C', ms=2.5, lw=1.2, label='Decreasing Stress', zorder=3)
+    ax1.fill_betweenx([0, 8], 2.8, 4.2, color='purple', alpha=0.1, lw=0, zorder=0)
+    ax1.text(3.5, 6.7, "Bistable\nRegion",
+            ha='center', va='center', color='purple', fontweight='bold', fontsize=7,
+            bbox=dict(facecolor='white', alpha=0.6, edgecolor='none', pad=1))
+
+    ax1.set_xlabel(r"External Uncertainty ($\sigma^2$)", fontweight='bold')
+    ax1.set_ylabel(r"Phasic Gain ($\langle \gamma \rangle$)", fontweight='bold', color='#377EB8')
+    ax1.tick_params(axis='y', labelcolor='#377EB8')
+    ax1.set_ylim(0, 7.5)
+    
+    # Plot Efficiency (Right Axis)
+    ax2 = ax1.twinx()
+    ax2.plot(sigma_rev, eta_rev, ':', c='black', lw=1.5, alpha=0.7, label=r'Efficiency $\eta$')
+    ax2.set_ylabel(r"Efficiency $\eta$", fontweight='bold', color='gray')
+    ax2.tick_params(axis='y', labelcolor='black')
+    ax2.set_ylim(0, 1.1)
+
+    plt.tight_layout()
+    plt.savefig('Fig2_PhaseDiagram_Hysteresis.png')
+    print("Fig2_PhaseDiagram_Hysteresis.png Generated.")
+
+if __name__ == "__main__":
+    generate_figure2()
