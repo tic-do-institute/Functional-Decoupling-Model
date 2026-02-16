@@ -1,0 +1,182 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
+from scipy.integrate import odeint
+
+# --- Plotting Standards ---
+plt.rcParams.update({
+    'font.family': 'sans-serif',
+    'font.sans-serif': ['Arial', 'Helvetica', 'DejaVu Sans'],
+    'font.size': 7,
+    'axes.labelsize': 8,
+    'axes.titlesize': 9,
+    'xtick.labelsize': 7,
+    'ytick.labelsize': 7,
+    'legend.fontsize': 6,
+    'lines.linewidth': 1.2,
+    'figure.titlesize': 10,
+    'savefig.dpi': 600,
+    'savefig.bbox': 'tight',
+    'savefig.pad_inches': 0.05
+})
+
+# ==============================================================================
+# 1. Physics Engine
+# ==============================================================================
+def potential_derivative(gamma, k=2.0, g_L=0.5, g_U=3.0, g_H=6.0):
+    """
+    Force field: -dV/dgamma
+    The cubic interaction creates bistability.
+    """
+    return k * (gamma - g_L) * (gamma - g_U) * (g_H - gamma)
+
+def compute_potential(gamma_range, k=2.0, g_L=0.5, g_U=3.0, g_H=6.0):
+    """
+    Compute V(gamma) by integrating the force.
+    V(x) = - integral(F(x) dx)
+    """
+    # Numerical integration for visualization
+    V = []
+    v_curr = 0
+    d_gamma = gamma_range[1] - gamma_range[0]
+    for g in gamma_range:
+        force = potential_derivative(g, k, g_L, g_U, g_H)
+        v_curr -= force * d_gamma
+        V.append(v_curr)
+    return np.array(V)
+
+# ==============================================================================
+# 2. Simulation Logic
+# ==============================================================================
+def run_comparison_simulation():
+    dt = 0.01
+    T = 9.0
+    time = np.arange(0, T, dt)
+    
+    # Common Parameters
+    k = 2.0
+    alpha_error = 25.0
+    g_L, g_U, g_H = 0.5, 3.0, 6.0
+    
+    # --- Input Design (Counterfactual Analysis) ---
+    # Constraint: Equal Total Energy (Integral of Input)
+    
+    # 1. Tonic Input (Low amplitude, Long duration)
+    # Amp = 2.0, Duration = 5.0s -> Energy = 10.0
+    input_tonic = np.zeros_like(time)
+    tonic_start = int(2.0 / dt)
+    tonic_dur = int(5.0 / dt)
+    input_tonic[tonic_start : tonic_start + tonic_dur] = 2.0
+    
+    # 2. Phasic Input (High amplitude, Short duration)
+    # Energy = 10.0 -> If duration = 0.5s, Amp must be 20.0
+    input_phasic = np.zeros_like(time)
+    phasic_start = int(2.0 / dt)
+    phasic_dur = int(0.5 / dt)
+    input_phasic[phasic_start : phasic_start + phasic_dur] = 20.0
+    
+    # Simulation Loop
+    def step_model(current_g, inp_val):
+        force_pot = potential_derivative(current_g, k, g_L, g_U, g_H)
+        # Assuming minimal sensory error in the trapped state to isolate input effect
+        force_err = -0.1 
+        d_gamma = force_pot + force_err + inp_val
+        return d_gamma
+
+    # Run Tonic
+    gamma_tonic = np.zeros_like(time)
+    gamma_tonic[0] = 0.5 # Start at Defensive Well
+    for t in range(len(time)-1):
+        dg = step_model(gamma_tonic[t], input_tonic[t])
+        gamma_tonic[t+1] = np.clip(gamma_tonic[t] + dg * dt, 0, 10)
+
+    # Run Phasic
+    gamma_phasic = np.zeros_like(time)
+    gamma_phasic[0] = 0.5
+    for t in range(len(time)-1):
+        dg = step_model(gamma_phasic[t], input_phasic[t])
+        gamma_phasic[t+1] = np.clip(gamma_phasic[t] + dg * dt, 0, 10)
+        
+    return time, gamma_tonic, gamma_phasic, input_tonic, input_phasic
+
+# ==============================================================================
+# 3. Plotting
+# ==============================================================================
+def plot_fig4():
+    fig = plt.figure(figsize=(7.0, 3.5))
+    gs = gridspec.GridSpec(1, 2, width_ratios=[1, 1.3], wspace=0.25)
+    
+    # --- PANEL A: Critical Slowing Down ---
+    ax0 = fig.add_subplot(gs[0])
+    
+    gamma_x = np.linspace(0, 7.0, 200)
+    # Healthy Potential
+    V_healthy = compute_potential(gamma_x, k=2.0)
+    V_healthy -= np.min(V_healthy) # Align to 0
+    
+    # Stressed Potential (Tilted)
+    # Simulate stress by adding a linear tilt term (conceptually equivalent to noise/error)
+    V_stressed = compute_potential(gamma_x, k=2.0) + 15 * gamma_x
+    V_stressed -= np.min(V_stressed)
+    
+    # Plot
+    ax0.plot(gamma_x, V_healthy, color='#4DAF4A', lw=1.5, label='Healthy State')
+    ax0.plot(gamma_x, V_stressed, color='#E41A1C', lw=1.5, ls='--', label='Pre-Collapse State')
+    
+    # Annotations
+    # Healthy well (deep)
+    ax0.annotate("Deep Well\n(Fast Recovery)", xy=(6.0, 5), xytext=(4.5, 40),
+                 arrowprops=dict(arrowstyle="->", color='#4DAF4A'), fontsize=6, color='#4DAF4A')
+    
+    # Stressed well (shallow)
+    ax0.annotate("Shallow Well\n(Critical Slowing Down)", xy=(0.5, 5), xytext=(0.4, 80),
+                 arrowprops=dict(arrowstyle="->", color='#E41A1C'), fontsize=6, color='#E41A1C', fontweight='bold')
+
+    ax0.set_xlabel(r"Precision Parameter $\gamma$")
+    ax0.set_ylabel(r"Effective Potential $U(\gamma)$")
+    ax0.set_ylim(-10, 150)
+    ax0.set_xlim(0, 7.0)
+    ax0.set_title("A. Critical Slowing Down", loc='left', fontweight='bold')
+    ax0.legend(loc='upper right', frameon=False)
+    
+    # --- PANEL B: Counterfactual Analysis (Tonic vs Phasic) ---
+    time, g_tonic, g_phasic, i_tonic, i_phasic = run_comparison_simulation()
+    
+    ax1 = fig.add_subplot(gs[1])
+    
+    # 1. Plot Inputs (Background Area)
+    ax1_in = ax1.twinx()
+    ax1_in.fill_between(time, 0, i_tonic, color='gray', alpha=0.3, label=r'Tonic Input ($\int E=10$)')
+    ax1_in.fill_between(time, 0, i_phasic, color='#377EB8', alpha=0.3, label=r'Phasic Input ($\int E=10$)')
+    ax1_in.set_ylim(0, 25)
+    ax1_in.axis('off') 
+    
+    # 2. Plot Responses (Foreground Lines)
+    ax1.plot(time, g_tonic, color='gray', lw=2.0, ls='-', label='Response: Trapped')
+    ax1.plot(time, g_phasic, color='#377EB8', lw=2.0, ls='-', label='Response: Rescued')
+    
+    # 3. Barriers and Thresholds
+    ax1.axhline(3.0, color='k', ls=':', lw=1.0, alpha=0.5)
+    ax1.text(4.0, 3.1, "Potential Barrier", fontsize=6, color='k', alpha=0.7)
+    
+    # Annotations
+    ax1.text(4.0, 1.0, r"$\eta \to 0$ (Heat Dissipation)", color='gray', fontsize=6, fontweight='bold')
+    ax1.text(4.0, 6.2, r"Successful Transition", color='#377EB8', fontsize=6, fontweight='bold')
+    
+    # Title & Labels
+    ax1.set_xlabel("Time (s)")
+    ax1.set_ylabel(r"Precision $\gamma$")
+    ax1.set_ylim(0, 10.5)
+    ax1.set_title("B. High-Jerk Rescue (Equal Energy Control)", loc='left', fontweight='bold')
+    
+    # Custom Legend combining both axes
+    h1, l1 = ax1.get_legend_handles_labels()
+    h2, l2 = ax1_in.get_legend_handles_labels()
+    ax1.legend(h2 + h1, l2 + l1, loc='upper right', fontsize=6, frameon=True)
+
+    plt.tight_layout()
+    plt.savefig('Fig4_Predictions.png')
+    print("Fig4_Predictions.png generated successfully.")
+
+if __name__ == "__main__":
+    plot_fig4()
