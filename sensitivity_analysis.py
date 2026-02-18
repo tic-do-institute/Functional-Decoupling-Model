@@ -49,13 +49,13 @@ class GradientKuramotoChain:
                     force += diff
                     err_sum += diff**2
                     count += 1
-            
+
             coupling_force[i] = self.gamma[i] * force
             if count > 0:
                 instantaneous_error_sq[i] = err_sum / count
 
         # Gamma Update
-        F_intrinsic = self.potential_derivative(self.gamma) 
+        F_intrinsic = self.potential_derivative(self.gamma)
         F_error = - self.alpha_error * instantaneous_error_sq
         d_gamma = F_intrinsic + F_error
         self.gamma += d_gamma * self.dt
@@ -69,16 +69,16 @@ class GradientKuramotoChain:
         return self.gamma
 
 # --- Parameter Sweep Simulation ---
-def generate_figure3():
-    print("Generating Figure 3 (Robustness Landscape)...")
+def generate_figure4():
+    print("Generating Figure 4 (Robustness Landscape)...")
     np.random.seed(42)
     dt = 0.01
     target_node = 2
 
     # Ranges
-    alpha_values = np.linspace(5.0, 100.0, 40) 
+    alpha_values = np.linspace(5.0, 100.0, 40)
     sigma_values = np.linspace(0.0, 20.0, 40)
-    
+
     # Grid
     phase_map = np.zeros((len(sigma_values), len(alpha_values)))
 
@@ -86,7 +86,7 @@ def generate_figure3():
     for i, sigma in enumerate(sigma_values):
         for j, alpha in enumerate(alpha_values):
             model = GradientKuramotoChain(n_nodes=5, dt=dt, alpha_error=alpha, k_pot=1.0)
-            
+
             # Simulation (20 seconds)
             for _ in range(2000):
                 base_noise = np.random.normal(0, 0.1, 5) * np.sqrt(dt)
@@ -97,14 +97,14 @@ def generate_figure3():
             phase_map[i, j] = model.gamma[target_node]
 
     # --- Visualization ---
-    fig, ax = plt.subplots(figsize=(5.0, 4.0)) 
+    fig, ax = plt.subplots(figsize=(5.0, 4.0))
 
     X, Y = np.meshgrid(alpha_values, sigma_values)
     cmap = plt.cm.RdYlBu
 
     # pcolormesh
     mesh = ax.pcolormesh(X, Y, phase_map, shading='auto', cmap=cmap, vmin=0, vmax=6)
-    
+
     # Colorbar
     cbar = plt.colorbar(mesh, ax=ax)
     cbar.set_label(r"Steady-State Precision $\gamma$", rotation=270, labelpad=15)
@@ -115,15 +115,15 @@ def generate_figure3():
     ax.set_title(r"Topological Robustness of Precision Collapse", loc='left', fontweight='bold')
 
     # Annotations
-    ax.text(75, 3.0, "Healthy Regime\n(Robust Sync)", 
-            color='#377EB8', 
+    ax.text(75, 3.0, "Healthy Regime\n(Robust Sync)",
+            color='#377EB8',
             ha='center', va='center', fontweight='bold', fontsize=8,
-            
+
             bbox=dict(facecolor='white', alpha=0.9, edgecolor='#377EB8', boxstyle='round,pad=0.3'))
-    
-    # PPEN Regime 
-    ax.text(25, 16.0, "PPEN Regime\n(Collapse)", 
-            color='#E41A1C', 
+
+    # PPEN Regime
+    ax.text(25, 16.0, "PPEN Regime\n(Collapse)",
+            color='#E41A1C',
             ha='center', va='center', fontweight='bold', fontsize=8,
             bbox=dict(facecolor='white', alpha=0.9, edgecolor='#E41A1C', boxstyle='round,pad=0.3'))
 
@@ -131,8 +131,8 @@ def generate_figure3():
     ax.contour(X, Y, phase_map, levels=[2.5], colors='k', linestyles='--', linewidths=1.0)
 
     plt.tight_layout()
-    plt.savefig('Fig3_Robustness.png')
-    print("Fig3_Robustness.png Generated.")
+    plt.savefig('Fig4_Robustness.png')
+    print("Fig4_Robustness.png Generated.")
 
 if __name__ == "__main__":
-    generate_figure3()
+    generate_figure4()
