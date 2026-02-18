@@ -1,41 +1,100 @@
-# Bistable Precision Dynamics and Informational Reversal
-## A Computational Mechanism of Functional Decoupling
+# A Zero-Efficiency Regime Explains Irreversible Gain Collapse in the Locus Coeruleus
 
-**Official Simulation Code Repository** **Manuscript Status:** Under Review at *PNAS (Proceedings of the National Academy of Sciences)*
+**Official Simulation Code Repository**
 
-This repository contains the source code used to generate the computational results and figures presented in the manuscript: *"Bistable Precision Dynamics and Informational Reversal: A Computational Mechanism of Functional Decoupling"*.
 
-The code implements the **Gradient-based Coupled Active Inference (G-CAI) Kuramoto model**, simulating how chronic functional disorders emerge as metastable attractors driven by defensive precision collapse and hysteresis.
+**Manuscript Status:** Submitted to *PNAS (Proceedings of the National Academy of Sciences)* 
+
+This repository contains the source code used to generate the computational results and figures presented in the manuscript: *"A Zero-Efficiency Regime Explains Irreversible Gain Collapse in the Locus Coeruleus"*.
+
+The code implements a **Gradient-based Coupled Active Inference (G-CAI) Kuramoto model**, simulating how chronic functional disorders emerge as metastable attractors driven by a "Zero-Efficiency" thermodynamic trap.
 
 ---
 
 ## 📂 Repository Structure
 
-* **`core_simulation.py`** The core physics engine. It simulates the time-series evolution of the system, precision dynamics, and the hysteresis loop.
-   * **Generates Figure 1:** Phase dynamics, precision collapse, and recovery via Specific Informational Perturbation (SIP).
-   * **Generates Figure 2:** The hysteresis loop showing the bistable region (Defensive vs. Healthy wells).
+The simulation scripts are organized according to the Figures they generate in the manuscript:
 
-* **`sensitivity_analysis.py`** Performs a comprehensive parameter sweep to validate the topological robustness of the model.
-   * **Generates Figure 3:** Phase diagram (heatmap) of steady-state precision against Error Sensitivity ($\alpha$) and Environmental Uncertainty ($\sigma$).
+* 
+**`Theory_overview.py`** 
 
-* **`requirements.txt`** List of Python dependencies required to run the simulations.
+
+* **Function:** Derives the analytical bifurcation map and thermodynamic efficiency.
+* 
+**Output:** **Figure 1** (Thermodynamic-informational phase transition, Canonical bifurcation map, Efficiency , and Topological irreversibility).
+
+
+
+
+* 
+**`core_simulation.py`** 
+
+
+* **Function:** Simulates the time-series evolution of the system, including phase dynamics and precision collapse under stress.
+* 
+**Output:** **Figure 2** (Dynamical Capture of the LC-NE System, Phase Dynamics, and Irreversibility).
+
+
+
+
+* 
+**`Hysteresis_loop&Efficiency.py`** 
+
+
+* **Function:** Simulates the forward and backward stress sweeps to demonstrate hysteresis.
+* 
+**Output:** **Figure 3** (The Hysteresis Loop of Locus Coeruleus Dynamics and the Zero-Efficiency regime).
+
+
+
+
+* 
+**`sensitivity_analysis.py`** 
+
+
+* **Function:** Performs a comprehensive parameter sweep across Error Sensitivity () and Environmental Uncertainty ().
+* 
+**Output:** **Figure 4** (Topological Robustness of Precision Collapse heatmap).
+
+
+
+
+* 
+**`Prediction.py`** 
+
+
+* **Function:** Simulates the effective potential landscape and counterfactual analysis of therapeutic interventions.
+* 
+**Output:** **Figure 5** (Theoretically Predicted Signatures: Critical Slowing Down and High-Jerk Rescue).
+
+
+
+
 
 ---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 * Python 3.8 or higher
-* Standard scientific computing libraries (`numpy`, `matplotlib`)
+* Standard scientific computing libraries (`numpy`, `matplotlib`, `scipy`) 
+
+
 
 ### Installation
 
 1. Clone this repository:
-   ```bash
-   git clone [https://github.com/tic-do-institute/Functional-Decoupling-Model.git](https://github.com/tic-do-institute/Functional-Decoupling-Model.git)
-   cd Functional-Decoupling-Model
+```bash
+git clone https://github.com/tic-do-institute/Functional-Decoupling-Model.git
+cd Functional-Decoupling-Model
 
 ```
+
+
+
+[Note: Repository URL based on manuscript data availability statement ]
+
 
 2. Install dependencies:
 ```bash
@@ -49,46 +108,64 @@ pip install -r requirements.txt
 
 ## 💻 Usage
 
-To reproduce the figures from the manuscript, simply run the Python scripts. The figures will be saved as `.png` files in the same directory.
+To reproduce the figures from the manuscript, run the corresponding Python scripts. The figures will be saved as `.png` files in the same directory.
 
-### Reproducing Figure 1 (Dynamics) & Figure 2 (Hysteresis)
+### 1. Theory & Bifurcation Map (Fig 1)
+
+```bash
+python Theory_overview.py
+
+```
+
+*Output:* `Figure_1.png`
+
+### 2. Time-Series Dynamics (Fig 2)
 
 ```bash
 python core_simulation.py
 
 ```
 
-*Output:* `Fig1_Gradient_Simulation.png`, `Fig2_PhaseDiagram_Hysteresis.png`
+*Output:* `Fig2_Gradient_Simulation.png` 
 
-### Reproducing Figure 3 (Robustness Analysis)
+### 3. Hysteresis Loop (Fig 3)
+
+```bash
+python Hysteresis_loop&Efficiency.py
+
+```
+
+*Output:* `Fig3_PhaseDiagram_Hysteresis.png` 
+
+### 4. Robustness Analysis (Fig 4)
 
 ```bash
 python sensitivity_analysis.py
 
 ```
 
-*Output:* `Fig3_Robustness.png`
+*Output:* `Fig4_Robustness.png` 
+
+### 5. Predictions & Rescue (Fig 5)
+
+```bash
+python Prediction.py
+
+```
+
+*Output:* `Fig5_Predictions.png` 
 
 ---
 
-
-
 ## 📬 Contact
 
-**Takafumi Shiga** Principal Investigator
-
+**Takafumi Shiga**
+Principal Investigator
 TIC-DO Institute, Tokyo, Japan
-
-Email: tic.do.institute@proton.me
-
-Web: [https://tic-do-institute.github.io](https://tic-do-institute.github.io)
+Email: tic.do.institute@proton.me Web: [https://tic-do-institute.github.io]() 
 
 ---
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-```
-
-```
+This project is licensed under the MIT License.
