@@ -11,6 +11,9 @@ The code implements a **Gradient-based Coupled Active Inference (G-CAI) Kuramoto
 
 ---
 
+## 📝 Note on Terminology
+*Please note: In earlier working versions of this project and some pre-compiled supplementary figures (e.g., Figure 4), the low-precision state was occasionally labeled using the internal working acronym **PPEN** (Proprioceptive Prediction Error Neglect). To better align with the macroscopic biophysical and thermodynamic focus of the final manuscript, this terminology has been unified to **"Zero-Efficiency Regime"** or **"Collapsed Regime"** in the latest version of this codebase.*
+
 ## 📂 Repository Structure
 
 The simulation scripts are organized according to the Figures they generate in the manuscript:
