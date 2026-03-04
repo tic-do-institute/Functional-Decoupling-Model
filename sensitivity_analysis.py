@@ -115,14 +115,14 @@ def generate_figure4():
     ax.set_title(r"Topological Robustness of Precision Collapse", loc='left', fontweight='bold')
 
     # Annotations
-    ax.text(75, 3.0, "Healthy Regime\n(Robust Sync)",
+    ax.text(20, 0.9, "Healthy Regime\n(Robust Sync)",
             color='#377EB8',
             ha='center', va='center', fontweight='bold', fontsize=8,
 
             bbox=dict(facecolor='white', alpha=0.9, edgecolor='#377EB8', boxstyle='round,pad=0.3'))
 
-    # Zero-Efficiency　/ Collapsed Regime
-    ax.text(25, 16.0, "Zero-Efficiency Regime\n(Collapse)",
+    # Collapsed Regime
+    ax.text(75, 16.0, "Collapsed Regime\n(Collapse)",
             color='#E41A1C',
             ha='center', va='center', fontweight='bold', fontsize=8,
             bbox=dict(facecolor='white', alpha=0.9, edgecolor='#E41A1C', boxstyle='round,pad=0.3'))
