@@ -37,7 +37,8 @@ The simulation scripts are organized according to the Figures they generate in t
 * 
 **Output:** **Figure 2** (Dynamical Capture of the LC-NE System, Phase Dynamics, and Irreversibility).
 
-
+## Note on Simulation Logic (Figure 2)
+The simulation code for Figure 2 has been updated to incorporate **natural frequency heterogeneity** among oscillators. This refinement eliminates a synchronization artifact caused by uniform natural frequencies and correctly demonstrates the **decoherence** (drop in order parameter $R$) predicted by the Gain Collapse theory. The output now aligns perfectly with the physical interpretation presented in the manuscript.
 
 
 * 
