@@ -129,7 +129,7 @@ def plot_fig5():
                  arrowprops=dict(arrowstyle="->", color='#4DAF4A'), fontsize=6, color='#4DAF4A')
     
     # Stressed well (shallow)
-    ax0.annotate("Shallow Well\n(Critical Slowing Down)", xy=(0.5, 5), xytext=(0.4, 80),
+    ax0.annotate("Shallow Well\n(Critical Slowing Down)", xy=(5.5, 75), xytext=(2.4, 110),
                  arrowprops=dict(arrowstyle="->", color='#E41A1C'), fontsize=6, color='#E41A1C', fontweight='bold')
 
     ax0.set_xlabel(r"Precision Parameter $\gamma$")
