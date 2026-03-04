@@ -33,7 +33,6 @@ class ModelParams:
     g_H: float = 6.0
     k_pot: float = 2.0
     alpha_error: float = 25.0
-    gamma_diss: float = 1.0
 
 class GCAIKuramotoChain:
     def __init__(self, params: ModelParams):
@@ -45,7 +44,6 @@ class GCAIKuramotoChain:
         self.gamma = np.ones(self.p.n_nodes) * self.p.g_H
 
     def _potential_force(self, gamma):
-        # Cubic derivative of the bistable potential V(gamma)
         return self.p.k_pot * (gamma - self.p.g_L) * (gamma - self.p.g_U) * (self.p.g_H - gamma)
 
     def step(self, noise_std_dev, sip_impulse=None):
@@ -59,7 +57,7 @@ class GCAIKuramotoChain:
         sq_error = (diff_left**2 + diff_right**2) / neighbor_counts
 
         F_intrinsic = self._potential_force(self.gamma)
-        F_error      = - self.p.alpha_error * sq_error
+        F_error     = - self.p.alpha_error * sq_error
         d_gamma = F_intrinsic + F_error
 
         if sip_impulse is not None:
@@ -68,7 +66,6 @@ class GCAIKuramotoChain:
         self.gamma += d_gamma * self.p.dt
         self.gamma = np.clip(self.gamma, 0.01, 10.0)
 
-        # Stochastic term (noise)
         noise = np.random.normal(0, 1, N) * noise_std_dev * np.sqrt(self.p.dt)
         d_theta = self.p.omega + weighted_coupling
         self.theta += d_theta * self.p.dt + noise
@@ -77,37 +74,35 @@ class GCAIKuramotoChain:
         return self.theta, self.gamma, np.abs(z)
 
 # ==============================================================================
-# 2. GENERATE FIGURE 3 (Hysteresis Loop & Efficiency)
+# 2. GENERATE FIGURE 3 (Hysteresis Loop)
 # ==============================================================================
 def generate_figure3():
-    print("Generating Figure 3 (Hysteresis & Efficiency)...")
-    
+    print("Generating Figure 3 ...")
+
     params = ModelParams(n_nodes=5, dt=0.01, k_pot=2.0, alpha_error=25.0)
     model = GCAIKuramotoChain(params)
-    
-    # Stress (sigma^2) sweep
+
     sigma_fwd = np.linspace(0.0, 7.0, 50)
     sigma_rev = np.linspace(7.0, 0.0, 50)
     gamma_fwd = []
     gamma_rev = []
-    eta_rev = []
 
     settle_steps = 300
     avg_window = 50
     np.random.seed(42)
 
-    # Forward Sweep (Increasing Stress)
+    # Forward Sweep
     model.gamma[:] = params.g_H
     for s in sigma_fwd:
         gammas = []
         for i in range(settle_steps):
-            noise_vec = np.ones(params.n_nodes) * np.sqrt(s) 
+            noise_vec = np.ones(params.n_nodes) * np.sqrt(s)
             model.step(noise_vec)
             if i >= (settle_steps - avg_window):
                 gammas.append(np.mean(model.gamma))
         gamma_fwd.append(np.mean(gammas))
 
-    # Reverse Sweep (Decreasing Stress)
+    # Backward Sweep
     for s in sigma_rev:
         gammas = []
         for i in range(settle_steps):
@@ -115,21 +110,28 @@ def generate_figure3():
             model.step(noise_vec)
             if i >= (settle_steps - avg_window):
                 gammas.append(np.mean(model.gamma))
-        
-        avg_gamma = np.mean(gammas)
-        gamma_rev.append(avg_gamma)
-        
-        # Calculate Efficiency eta
-        # eta = gamma / (gamma + gamma_diss)
-        eta = avg_gamma / (avg_gamma + params.gamma_diss)
-        eta_rev.append(eta)
+        gamma_rev.append(np.mean(gammas))
 
-    # Plot
-    fig, ax1 = plt.subplots(figsize=(3.4, 2.8))
+    fig, ax1 = plt.subplots(figsize=(4.0, 2.8))
+    ax1.plot(sigma_fwd, gamma_fwd, 'o-', c='#377EB8', ms=2.5, lw=1.2, label=r'Forward Sweep ($\sigma^2 \uparrow$)', zorder=2)
+    ax1.plot(sigma_rev, gamma_rev, 'o--', c='#E41A1C',ms=2.5, lw=1.2, label=r'Backward Sweep ($\sigma^2 \downarrow$)', zorder=3)
     
-    # Plot Gamma (Left Axis)
-    ax1.plot(sigma_fwd, gamma_fwd, 'o-', c='#377EB8', ms=2.5, lw=1.2, label='Increasing Stress', zorder=2)
-    ax1.plot(sigma_rev, gamma_rev, 'o--', c='#E41A1C', ms=2.5, lw=1.2, label='Decreasing Stress', zorder=3)
+    arrow_gap = 6 
+    
+    mid_f = len(sigma_fwd) // 2
+    ax1.annotate('', 
+                xy=(sigma_fwd[mid_f + arrow_gap], gamma_fwd[mid_f + arrow_gap]), 
+                xytext=(sigma_fwd[mid_f], gamma_fwd[mid_f]),
+                arrowprops=dict(arrowstyle="-|>", color='blue', lw=2.0, mutation_scale=15), 
+                zorder=4)
+    
+    mid_r = len(sigma_rev) // 2
+    ax1.annotate('', 
+                xy=(sigma_rev[mid_r + arrow_gap], gamma_rev[mid_r + arrow_gap]), 
+                xytext=(sigma_rev[mid_r], gamma_rev[mid_r]), 
+                arrowprops=dict(arrowstyle="-|>", color='red', lw=2.0, mutation_scale=15), 
+                zorder=4)
+   
     ax1.fill_betweenx([0, 8], 2.8, 4.2, color='purple', alpha=0.1, lw=0, zorder=0)
     ax1.text(3.5, 6.7, "Bistable\nRegion",
             ha='center', va='center', color='purple', fontweight='bold', fontsize=7,
@@ -139,17 +141,12 @@ def generate_figure3():
     ax1.set_ylabel(r"Phasic Gain ($\langle \gamma \rangle$)", fontweight='bold', color='#377EB8')
     ax1.tick_params(axis='y', labelcolor='#377EB8')
     ax1.set_ylim(0, 7.5)
-    
-    # Plot Efficiency (Right Axis)
-    ax2 = ax1.twinx()
-    ax2.plot(sigma_rev, eta_rev, ':', c='black', lw=1.5, alpha=0.7, label=r'Efficiency $\eta$')
-    ax2.set_ylabel(r"Efficiency $\eta$", fontweight='bold', color='gray')
-    ax2.tick_params(axis='y', labelcolor='black')
-    ax2.set_ylim(0, 1.1)
+    ax1.legend(loc='upper right')
 
     plt.tight_layout()
-    plt.savefig('Fig3_PhaseDiagram_Hysteresis.png')
-    print("Fig3_PhaseDiagram_Hysteresis.png Generated.")
+    plt.savefig('Figure_3.png')
+    print("Figure_3.png Generated.")
+
 
 if __name__ == "__main__":
     generate_figure3()
