@@ -1,80 +1,69 @@
-# A Zero-Efficiency Regime Explains Irreversible Gain Collapse in the Locus Coeruleus
+# Critical Collapse of Biological Precision: A Fold Bifurcation from Information-Metabolic Tradeoffs
 
 **Official Simulation Code Repository**
 
+**Manuscript Status:** Submitted to *Journal of the Royal Society Interface* (JRSI)
 
-**Manuscript Status:** Submitted to *PNAS (Proceedings of the National Academy of Sciences)* 
+This repository contains the full suite of Python source codes used to generate the computational results, theoretical profiles, and empirical data analyses presented in the manuscript and its Supplementary Information (SI).
 
-This repository contains the source code used to generate the computational results and figures presented in the manuscript: *"A Zero-Efficiency Regime Explains Irreversible Gain Collapse in the Locus Coeruleus"*.
-
-The code implements a **Gradient-based Coupled Active Inference (G-CAI) Kuramoto model**, simulating how chronic functional disorders emerge as metastable attractors driven by a "Zero-Efficiency" thermodynamic trap.
+The code implements a formal non-equilibrium thermodynamic framework, modeling how biological gain control (precision) generically approaches a fold (saddle-node) catastrophe when subject to continuous metabolic constraints, leading to an irreversible "near-zero efficiency" state.
 
 ---
 
 ## 📝 Note on Terminology
-*Please note: In earlier working versions of this project and some pre-compiled supplementary figures (e.g., Figure 4), the low-precision state was occasionally labeled using the internal working acronym **PPEN** (Proprioceptive Prediction Error Neglect). To better align with the macroscopic biophysical and thermodynamic focus of the final manuscript, this terminology has been unified to **"Zero-Efficiency Regime"** or **"Collapsed Regime"** in the latest version of this codebase.*
+
+*Please note: In earlier working versions of this project and some internal codebase logs, the low-precision state was occasionally referred to using the acronym **PPEN** (Proprioceptive Prediction Error Neglect). To align with the macroscopic biophysical and thermodynamic focus of the final manuscript, this terminology has been unified to **"Zero-Efficiency Regime"** or **"Collapsed Regime"**.*
+
+---
 
 ## 📂 Repository Structure
 
-The simulation scripts are organized according to the Figures they generate in the manuscript:
+The simulation scripts are organized according to the Figures they generate in the manuscript.
 
-* 
-**`Theory_overview.py`** 
+### 1. Theoretical Models & Simulations (Main Text)
 
-
-* **Function:** Derives the analytical bifurcation map and thermodynamic efficiency.
-* 
-**Output:** **Figure 1** (Thermodynamic-informational phase transition, Canonical bifurcation map, Efficiency , and Topological irreversibility).
+* **`Theory_overview.py`**
+* **Generates:** `Figure 1` (Bifurcation map, Efficiency, and Potential landscape).
+* **Description:** Derives the analytical bifurcation map and thermodynamic efficiency function.
 
 
+* **`core_simulation.py`**
+* **Generates:** `Figure 2` (Phase Dynamics, Precision, and Sync Order).
+* **Description:** Simulates the time-series evolution using a Gradient-based Coupled Active Inference (G-CAI) oscillator model. Note: This script incorporates natural frequency heterogeneity to correctly demonstrate emergent desynchronization (decoherence).
 
 
-* 
-**`core_simulation.py`** 
+* **`hysteresis_loop.py`**
+* **Generates:** `Figure 3` (The Hysteresis Loop of Gain Dynamics).
+* **Description:** Simulates the forward and backward stress sweeps to demonstrate the bistable region and hysteresis.
 
 
-* **Function:** Simulates the time-series evolution of the system, including phase dynamics and precision collapse under stress.
-* 
-**Output:** **Figure 2** (Dynamical Capture of the LC-NE System, Phase Dynamics, and Irreversibility).
-
-## Note on Simulation Logic (Figure 2)
-The simulation code for Figure 2 has been updated to incorporate **natural frequency heterogeneity** among oscillators. This refinement eliminates a synchronization artifact caused by uniform natural frequencies and correctly demonstrates the **decoherence** (drop in order parameter $R$) predicted by the Gain Collapse theory. The output now aligns perfectly with the physical interpretation presented in the manuscript.
-
-> **Reproducibility Note:**
-> The current code reflects recent refinements for physical accuracy (Decoherence). The original code used to generate the figures in the PNAS submission can be found under the `v1.0-pnas-submission` tag.
+* **`sensitivity_analysis.py`**
+* **Generates:** `Figure 4` (Topological Robustness heatmap).
+* **Description:** Performs a comprehensive parameter sweep to map the robustness of the precision collapse across the parameter space.
 
 
-* 
-**`Hysteresis_loop&Efficiency.py`** 
+* **`CSD_Scaling.py`**
+* **Generates:** `Figure 5` (Log-log scaling of relaxation time).
+* **Description:** Numerically integrates the normal form $\dot{x} = \mu - x^2$ to calculate relaxation times, proving the universal scaling law $\tau \sim |\mu|^{-1/2}$ of the fold universality class.
 
 
-* **Function:** Simulates the forward and backward stress sweeps to demonstrate hysteresis.
-* 
-**Output:** **Figure 3** (The Hysteresis Loop of Locus Coeruleus Dynamics and the Zero-Efficiency regime).
+* **`Predictions.py`**
+* **Generates:** `Figure 6` (Potential well flattening and Rescue dynamics).
+* **Description:** Simulates theoretically predicted signatures of collapse and recovery, comparing steady vs. high-derivative stimulation.
 
 
 
+### 2. Early Warning Signals & Empirical Validation (Supplementary Information)
 
-* 
-**`sensitivity_analysis.py`** 
-
-
-* **Function:** Performs a comprehensive parameter sweep across Error Sensitivity () and Environmental Uncertainty ().
-* 
-**Output:** **Figure 4** (Topological Robustness of Precision Collapse heatmap).
+* **`Critical_Slowing_Down.py`**
+* **Generates:** `Figure S1` (EWS Theoretical Profiles).
+* **Description:** Plots the predicted amplification of baseline variance and the increase in Lag-1 Autocorrelation as the system approaches criticality.
 
 
-
-
-* 
-**`Prediction.py`** 
-
-
-* **Function:** Simulates the effective potential landscape and counterfactual analysis of therapeutic interventions.
-* 
-**Output:** **Figure 5** (Theoretically Predicted Signatures: Critical Slowing Down and High-Jerk Rescue).
-
-
+* **`Empirical_Pipeline.py`**
+* **Generates:** `Figure S2`, `Figure S3`, `Figure S4`, `Figure S5` and terminal statistics.
+* **Description:** The complete automated data extraction and statistical validation pipeline (**Analysis Pipeline v1.0**). This script processes the raw BIDS dataset (OpenNeuro ds003838) to confirm the presence of critical slowing down and compensatory precision drive.
+* **Key Operations:** Preprocessing, extraction of dynamical proxies (Variance, AC1, Beta, Phasic), Negative Control (LMM), and Surrogate Permutation Testing (N=1000).
 
 
 
@@ -85,94 +74,48 @@ The simulation code for Figure 2 has been updated to incorporate **natural frequ
 ### Prerequisites
 
 * Python 3.8 or higher
-* Standard scientific computing libraries (`numpy`, `matplotlib`, `scipy`) 
+* Standard scientific computing libraries:
 
+```bash
+pip install numpy pandas scipy matplotlib seaborn statsmodels tqdm
 
+```
 
 ### Installation
 
 1. Clone this repository:
+
 ```bash
 git clone https://github.com/tic-do-institute/Functional-Decoupling-Model.git
 cd Functional-Decoupling-Model
 
 ```
 
+### Running the Code
 
-
-[Note: Repository URL based on manuscript data availability statement ]
-
-
-2. Install dependencies:
-```bash
-pip install -r requirements.txt
-
-```
-
-
-
----
-
-## 💻 Usage
-
-To reproduce the figures from the manuscript, run the corresponding Python scripts. The figures will be saved as `.png` files in the same directory.
-
-### 1. Theory & Bifurcation Map (Fig 1)
+To reproduce the figures, run the corresponding scripts. Figures will be saved as high-resolution `.png` or `.jpg` files.
 
 ```bash
-python Theory_overview.py
+# Example: Generating Figure 5
+python generate_fig5.py
 
 ```
-
-*Output:* `Figure_1.png`
-
-### 2. Time-Series Dynamics (Fig 2)
-
-```bash
-python core_simulation.py
-
-```
-
-*Output:* `Fig2_Gradient_Simulation.png` 
-
-### 3. Hysteresis Loop (Fig 3)
-
-```bash
-python Hysteresis_loop&Efficiency.py
-
-```
-
-*Output:* `Fig3_PhaseDiagram_Hysteresis.png` 
-
-### 4. Robustness Analysis (Fig 4)
-
-```bash
-python sensitivity_analysis.py
-
-```
-
-*Output:* `Fig4_Robustness.png` 
-
-### 5. Predictions & Rescue (Fig 5)
-
-```bash
-python Prediction.py
-
-```
-
-*Output:* `Fig5_Predictions.png` 
 
 ---
 
 ## 📬 Contact
 
 **Takafumi Shiga**
-Principal Investigator
-TIC-DO Institute, Tokyo, Japan
-Email: tic.do.institute@proton.me Web: [https://tic-do-institute.github.io]() 
+Director, TIC-DO Institute
+Tokyo, 1070052, Japan
+Email: tic.do.institute@proton.me
+Web: [https://tic-do-institute.github.io](https://tic-do-institute.github.io)
 
 ---
 
 ## 📄 License
 
 This project is licensed under the MIT License.
+
+---
+
