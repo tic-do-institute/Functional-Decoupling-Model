@@ -1,0 +1,70 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
+
+# Plotting Standards
+plt.rcParams.update({
+    'font.family': 'sans-serif',
+    'font.sans-serif': ['Arial', 'Helvetica', 'DejaVu Sans'],
+    'font.size': 8,
+    'axes.labelsize': 9,
+    'axes.titlesize': 10,
+    'lines.linewidth': 1.5,
+    'figure.titlesize': 11,
+    'savefig.dpi': 600,
+    'axes.linewidth': 0.8
+})
+
+def generate_figure_s1():
+    # Parameters representing distance to bifurcation (mu)
+    # mu goes from positive (stable) to 0 (critical)
+    mu_values = np.linspace(2.0, 0.01, 100)
+
+    # Theoretical Scaling Laws
+    # Relaxation time tau ~ 1 / sqrt(mu)
+    # Variance ~ 1 / sqrt(mu) (assuming constant noise intensity D)
+    # AC1 (Lag-1 Autocorrelation) approx exp(-dt / tau)
+
+    dt = 0.1 # Sampling interval hypothetical
+    tau = 1.0 / np.sqrt(mu_values)
+    ac1 = np.exp(-dt / tau)
+    variance = 0.5 / np.sqrt(mu_values) # Normalized D=1
+
+    # Mapping mu to "Stress Level" for visualization (reverse axis)
+    stress_level = 2.0 - mu_values
+
+    fig = plt.figure(figsize=(6.0, 3.0))
+    gs = gridspec.GridSpec(1, 2, wspace=0.3)
+
+    # Panel A: Variance (Flickering)
+    ax0 = fig.add_subplot(gs[0])
+    ax0.plot(stress_level, variance, color='#E41A1C', lw=2)
+    ax0.set_xlabel('Effective Stress / Uncertainty')
+    ax0.set_ylabel('Baseline Variance (Fluctuation)')
+    ax0.set_title('A. Amplification of Fluctuations', loc='left', fontweight='bold')
+    ax0.set_xlim(0, 2.0)
+    ax0.set_ylim(0, 3.0)
+
+    # Critical zone shading
+    ax0.axvspan(1.8, 2.0, color='gray', alpha=0.2)
+    ax0.text(1.9, 1.5, 'Critical\nZone', ha='right', fontsize=7)
+
+    # Panel B: AC1 (Sluggishness)
+    ax1 = fig.add_subplot(gs[1])
+    ax1.plot(stress_level, ac1, color='#377EB8', lw=2)
+    ax1.set_xlabel('Effective Stress / Uncertainty')
+    ax1.set_ylabel('Lag-1 Autocorrelation (AC1)')
+    ax1.set_title('B. Critical Slowing Down', loc='left', fontweight='bold')
+    ax1.set_xlim(0, 2.0)
+    ax1.set_ylim(0, 1.05)
+
+    # Critical zone shading
+    ax1.axvspan(1.8, 2.0, color='gray', alpha=0.2)
+    ax1.text(1.9, 0.5, 'Memory\nIncrease', ha='right', fontsize=7)
+
+    plt.tight_layout()
+    plt.savefig('Figure_S1.png')
+    print("Figure S1 Generated.")
+
+if __name__ == "__main__":
+    generate_figure_s1()
