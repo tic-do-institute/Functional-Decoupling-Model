@@ -20,11 +20,13 @@ warnings.simplefilter('ignore', ConvergenceWarning)
 # ==============================================================================
 # CONFIGURATION
 # ==============================================================================
-BIDS_ROOT_DIR = r"C:\Users\chiro\ds003838_pupil_data"
+# Specify the path to your local copy of the ds003838 dataset.
+# Download from OpenNeuro: https://openneuro.org/datasets/ds003838
+BIDS_ROOT_DIR = "./ds003838_pupil_data"
 FS = 250  
-DOWNSAMPLE_FACTOR = 5 # 250Hz -> 50Hz (AC1アーティファクト回避用)
+DOWNSAMPLE_FACTOR = 5 # 250Hz -> 50Hz (To avoid AC1 artifacts)
 
-# sub-013はアーティファクト排除の基準に基づき除外リストに追加
+# sub-013 is added to the exclusion list based on artifact rejection criteria
 EXCLUDE_SUBJECTS = ['sub-017', 'sub-094']
 
 sns.set_theme(style="whitegrid")
@@ -275,9 +277,9 @@ def plot_results(df):
         plt.close()
 
 # ==============================================================================
-# Analysis Pipeline v1.3: Absolute Trial-Index Trend Analysis
+# Analysis Pipeline v1.0: Absolute Trial-Index Trend Analysis
 # ==============================================================================
-def execute_pipeline_v1_3(df, n_surrogates=1000):
+def execute_pipeline_v1_0(df, n_surrogates=1000):
     print("\n" + "="*50)
     print("Executing Analysis Pipeline v1.3: Absolute Trial-Index Trend Analysis")
     print("="*50)
@@ -286,12 +288,12 @@ def execute_pipeline_v1_3(df, n_surrogates=1000):
     empirical_taus = {m: [] for m in metrics}
     valid_subjects = []
 
-    # 1. 経験的データのトレンド抽出（被験者レベル）
+    # 1. Empirical Trend Extraction (Subject Level)
     for subj in df['subject'].unique():
         df_sub = df[df['subject'] == subj].sort_values('trial_index').copy()
         df_sub = df_sub.dropna(subset=metrics)
         
-        # 統計的信頼性を確保するための最小試行数制約
+        # Minimum trial count constraint to ensure statistical reliability
         if len(df_sub) < 15:
             continue
             
@@ -301,7 +303,7 @@ def execute_pipeline_v1_3(df, n_surrogates=1000):
             if not np.isnan(tau):
                 empirical_taus[m].append(tau)
 
-    # 2. グループレベルの検定
+    # 2. Group-Level Testing
     results = []
     for m in metrics:
         taus = np.array(empirical_taus[m])
@@ -324,7 +326,7 @@ def execute_pipeline_v1_3(df, n_surrogates=1000):
     print("\n[Empirical Group-Level Statistics]")
     print(df_stats.to_string(index=False))
 
-    # 3. サロゲート検定 (Null Model: 時系列順序のランダム化)
+    # 3. Surrogate Test (Null Model: Randomization of time-series order)
     print(f"\nRunning Surrogate Permutation Test (N={n_surrogates})...")
     surrogate_p_values = {}
     
@@ -362,24 +364,22 @@ def execute_pipeline_v1_3(df, n_surrogates=1000):
     
     return df_stats, empirical_taus
 
-# ==============================================================================
-# 実行ブロック
-# ==============================================================================
+
 if __name__ == "__main__":
     try:
         df_results = run_pipeline()
         if not df_results.empty:
             perform_statistics(df_results)
             plot_results(df_results)
-            print(f"\n[SUCCESS] 計 {len(df_results)} 件の試行に基づく経験的整合性の解析および画像出力が完了しました。")
+            print(f"\n[SUCCESS] Empirical consistency analysis and image output based on {len(df_results)} trials have been completed.")
             
-            # --- SAIMの理論的実証（Fold分岐）の追加実行 ---
             df_stats, emp_taus = execute_pipeline_v1_3(df_results)
             
         else:
-            print("\n[ERROR] 有効なデータが抽出されませんでした。")
+            print("\n[ERROR] No valid data was extracted.")
     except Exception as e:
-        print("\n[エラー発生]")
+        print("\n[Error Occurred]")
         print(traceback.format_exc())
 
-    input("\n[処理完了] 結果を確認したらEnterキーを押して終了してください...")
+
+    input("\n[Processing Complete] Please check the results and press Enter to exit...")
