@@ -27,17 +27,17 @@ The simulation scripts are organized according to the Figures they generate in t
 * **Description:** Derives the analytical bifurcation map and thermodynamic efficiency function.
 
 
-* **`core_simulation.py`**
+* **`Core_Simulation.py`**
 * **Generates:** `Figure 2` (Phase Dynamics, Precision, and Sync Order).
 * **Description:** Simulates the time-series evolution using a Gradient-based Coupled Active Inference (G-CAI) oscillator model. Note: This script incorporates natural frequency heterogeneity to correctly demonstrate emergent desynchronization (decoherence).
 
 
-* **`hysteresis_loop.py`**
+* **`Hysteresis_loop.py`**
 * **Generates:** `Figure 3` (The Hysteresis Loop of Gain Dynamics).
 * **Description:** Simulates the forward and backward stress sweeps to demonstrate the bistable region and hysteresis.
 
 
-* **`sensitivity_analysis.py`**
+* **`Sensitivity_Analysis.py`**
 * **Generates:** `Figure 4` (Topological Robustness heatmap).
 * **Description:** Performs a comprehensive parameter sweep to map the robustness of the precision collapse across the parameter space.
 
