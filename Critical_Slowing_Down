@@ -1,0 +1,82 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+
+plt.rcParams.update({
+    'font.size': 14,
+    'axes.labelsize': 16,
+    'axes.titlesize': 16,
+    'xtick.labelsize': 14,
+    'ytick.labelsize': 14,
+    'lines.linewidth': 2.5,
+    'lines.markersize': 8,
+    'figure.figsize': (8, 6)
+})
+
+
+def simulate_relaxation(mu, runs=10):
+    dt = 0.001
+    T = 500
+    steps = int(T / dt)
+    x_star = np.sqrt(mu)
+    threshold = 0.9 * x_star
+
+    relax_times = []
+    for _ in range(runs):
+       
+        x = np.random.normal(0, 0.05 * x_star)
+        time_taken = steps * dt
+        for i in range(steps):
+            x += (mu - x**2) * dt
+            if x >= threshold:
+                time_taken = i * dt
+                break
+        relax_times.append(time_taken)
+
+    return np.mean(relax_times), np.std(relax_times)
+
+
+mu_sim = np.logspace(-3, -1, 15)
+tau_results = [simulate_relaxation(m) for m in mu_sim]
+tau_mean = np.array([res[0] for res in tau_results])
+tau_std = np.array([res[1] for res in tau_results])
+
+
+mu_theory = np.logspace(-3.5, -0.5, 100)
+tau_theory = np.arctanh(0.9) / np.sqrt(mu_theory)
+
+
+fig, ax = plt.subplots()
+
+
+ax.loglog(mu_theory, tau_theory, color='#1f77b4', zorder=1,
+          label=r'Analytical Scaling ($\tau \sim |\mu|^{-1/2}$)')
+
+
+tau_std = np.maximum(tau_std, 1e-5)
+ax.errorbar(mu_sim, tau_mean, yerr=tau_std, fmt='o', color='#ff7f0e',
+            ecolor='black', elinewidth=1.5, capsize=4,
+            markeredgecolor='black', markeredgewidth=1, zorder=2,
+            label='Numerical Relaxation\n(Averaged over runs)')
+
+
+mu_ref = np.array([1e-3, 1e-1])
+tau_ref = 0.6 * mu_ref**(-0.5) 
+ax.loglog(mu_ref, tau_ref, color='black', linestyle='--', linewidth=2, zorder=3,
+          label='Slope = -0.5')
+
+
+ax.set_xlabel(r'Distance to Criticality $|\mu|$')
+ax.set_ylabel(r'Relaxation Time $\tau$')
+ax.set_title('Critical Slowing Down Near Precision Collapse:\nScaling of Relaxation Time in the Fold Universality Class', fontsize=15)
+
+
+ax.grid(True, which="both", ls="--", alpha=0.5)
+ax.legend(frameon=True, fancybox=True, shadow=True, loc='upper right')
+
+
+ax.text(1.5e-3, 8e0, r'$\tau \sim |\mu|^{-1/2}$', fontsize=18,
+        bbox=dict(facecolor='white', alpha=0.9, edgecolor='gray', boxstyle='round,pad=0.5'))
+
+plt.tight_layout()
+plt.savefig('Figure_5.png', dpi=300)
