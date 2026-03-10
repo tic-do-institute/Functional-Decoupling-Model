@@ -281,7 +281,7 @@ def plot_results(df):
 # ==============================================================================
 def execute_pipeline_v1_0(df, n_surrogates=1000):
     print("\n" + "="*50)
-    print("Executing Analysis Pipeline v1.3: Absolute Trial-Index Trend Analysis")
+    print("Executing Analysis Pipeline v1.0: Absolute Trial-Index Trend Analysis")
     print("="*50)
     
     metrics = ['variance', 'ac1', 'phasic']
@@ -373,7 +373,7 @@ if __name__ == "__main__":
             plot_results(df_results)
             print(f"\n[SUCCESS] Empirical consistency analysis and image output based on {len(df_results)} trials have been completed.")
             
-            df_stats, emp_taus = execute_pipeline_v1_3(df_results)
+            df_stats, emp_taus = execute_pipeline_v1_0(df_results)
             
         else:
             print("\n[ERROR] No valid data was extracted.")
@@ -383,3 +383,4 @@ if __name__ == "__main__":
 
 
     input("\n[Processing Complete] Please check the results and press Enter to exit...")
+
